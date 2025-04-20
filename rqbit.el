@@ -328,6 +328,17 @@ Used to build the eldoc message."
       (forward-line 1))
     (tabulated-list-clear-all-tags)))
 
+(defun rqbit-jump-dired (&optional other-window)
+  "Jump to Dired buffer corresponding to the torrent.
+When OTHER-WINDOW is non-nil, jump to Dired buffer in other window."
+  (declare (modes rqbit-menu-mode))
+  (interactive "P" rqbit-menu-mode)
+  (let ((id (or (tabulated-list-get-id) (user-error "No torrent on this line"))))
+    (cl-destructuring-bind (&key name output_folder files &allow-other-keys) (rqbit--torrent-info id)
+      (dired-jump other-window (if (length= files 1)
+                                   (expand-file-name name output_folder)
+                                 output_folder)))))
+
 (defun rqbit-menu-play ()
   "Play torrent."
   (interactive)
@@ -406,6 +417,7 @@ Used to build the eldoc message."
   "d" #'rqbit-menu-pause
   "s" #'rqbit-menu-start
   "P" #'rqbit-menu-play
+  "j" #'rqbit-jump-dired
 
   "D" #'rqbit-menu-remove
   "K" #'rqbit-menu-remove-with-files
