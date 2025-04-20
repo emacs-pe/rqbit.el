@@ -213,6 +213,12 @@ value effective."
         rqbit-menu--marks nil)
   (tabulated-list-clear-all-tags))
 
+(defun rqbit--cancel-refresh-timer ()
+  "Cancel rqbit refresh timer."
+  (when (timerp rqbit--refresh-progress-timer)
+    (cancel-timer rqbit--refresh-progress-timer)
+    (setq rqbit--refresh-progress-timer nil)))
+
 (defun rqbit--speed-message-short (live)
   "Return a short description from the torrent LIVE property.
 Used to build the tool tip message."
@@ -434,6 +440,7 @@ When OTHER-WINDOW is non-nil, jump to Dired buffer in other window."
                                ("Name" 30 t)]
         tabulated-list-padding 2)
   (make-local-variable 'rqbit-menu--marks)
+  (add-hook 'kill-buffer-hook #'rqbit--cancel-refresh-timer nil t)
   (add-hook 'tabulated-list-revert-hook #'rqbit-menu--refresh nil t)
   (add-hook 'eldoc-documentation-functions 'rqbit-eldoc-function nil t)
   (tabulated-list-init-header)
