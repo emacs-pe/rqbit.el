@@ -341,7 +341,8 @@ When OTHER-WINDOW is non-nil, jump to Dired buffer in other window."
 
 (defun rqbit-menu-play ()
   "Play torrent."
-  (interactive)
+  (declare (modes rqbit-menu-mode))
+  (interactive nil rqbit-menu-mode)
   (let ((id (or (tabulated-list-get-id) (user-error "No torrent on this line"))))
     (unless (executable-find (car rqbit-playlist-command))
       (error "Cannot find the rqbit playlist program: %s" (car rqbit-playlist-command)))
@@ -453,7 +454,7 @@ When OTHER-WINDOW is non-nil, jump to Dired buffer in other window."
 (defun rqbit-add-torrent (torrent)
   "Add TORRENT to rqbit."
   (interactive "sTorrent: ")
-  (message "Adding torrent")
+  (message "Adding torrent...")
   (rqbit-request "/torrents" :method "POST" :data torrent)
   (when (eq major-mode 'rqbit-menu-mode)
     (tabulated-list-revert)))
