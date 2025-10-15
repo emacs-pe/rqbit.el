@@ -73,6 +73,14 @@
   "Integration for rqbit."
   :group 'processes)
 
+(defface rqbit-complete '((t :inherit success :inverse-video t))
+  "Face for completed torrents."
+  :group 'rqbit)
+
+(defface rqbit-in-progress '((t :inherit warning :inverse-video t))
+  "Face for in-progress torrents."
+  :group 'rqbit)
+
 (defcustom rqbit-host "http://127.0.0.1:3030"
   "Rqbit host to use."
   :type 'string
@@ -124,14 +132,6 @@ value effective."
             (json-object-type 'plist))
         (json-read))))
   "Read JSON object in buffer, move point to end of buffer.")
-
-(defvar rqbit--complete-color
-  (let ((color (face-attribute 'success :foreground)))
-    (list :background color :foreground (readable-foreground-color color))))
-
-(defvar rqbit--in-progress-color
-  (let ((color (face-attribute 'warning :foreground)))
-    (list :background color :foreground (readable-foreground-color color))))
 
 (cl-defun rqbit-request (endpoint
                          &key data
@@ -253,7 +253,7 @@ Used to build the eldoc message."
   "Build a string showing the PROGRESS from the TOTAL downloaded."
   (let* ((percentage (/ (float progress) total))
          (string (rqbit--center-string 10 (format "%2.2f%%" (* percentage 100.)))))
-    (put-text-property 0 (ceiling (* percentage 10)) 'face rqbit--in-progress-color string)
+    (put-text-property 0 (ceiling (* percentage 10)) 'face 'rqbit-in-progress string)
     string))
 
 (defun rqbit--get-progress (id)
@@ -261,7 +261,7 @@ Used to build the eldoc message."
   (cl-destructuring-bind (&key state total_bytes progress_bytes live &allow-other-keys) (rqbit--torrent-stats-v1 id)
     (let ((paused (string-equal state "paused"))
           (progress (if (= progress_bytes total_bytes)
-                        (propertize (rqbit--center-string 10 "100%") 'face rqbit--complete-color)
+                        (propertize (rqbit--center-string 10 "100%") 'face 'rqbit-complete)
                       (rqbit--progress-string progress_bytes total_bytes))))
       (list (propertize progress
                         'help-echo (rqbit--speed-message-short live)
